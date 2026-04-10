@@ -1,4 +1,6 @@
 # GitHub Repository: https://github.com/AbbyB2025/A8.git
+# Abby Blundell u1114910
+# A8SpritePreviewer
 
 import math
 
@@ -30,12 +32,11 @@ class SpritePreview(QMainWindow):
         self.is_playing = False
         # Add any other instance variables needed to track information as the program
         # runs here
-        self.timer = QTimer()
+        self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_frame)
 
         # Make the GUI in the setupUI method
         self.setupUI()
-
 
     def setupUI(self):
         # An application needs a central widget - often a QFrame
@@ -49,35 +50,36 @@ class SpritePreview(QMainWindow):
         frame.setLayout(layout)
 
         top_layout = QHBoxLayout()
-        self.sprite_label = QLabel(self)
-        # self.sprite_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        top_layout.addWidget(self.sprite_label)
-        layout.addLayout(top_layout)
+        self.sprite_label = QLabel()
         if self.frames:
             self.sprite_label.setPixmap(self.frames[0])
-
+        top_layout.addWidget(self.sprite_label)
+        layout.addLayout(top_layout)
+        # Adding the image inside the horizontal layout which is inside the main vertical layout
 
         self.slider = QSlider(Qt.Orientation.Vertical)
         self.slider.setRange(1, 100)
         self.slider.setValue(self.fps)
-        self.slider.setTickPosition(QSlider.TickPosition.TicksBelow)
+        self.slider.setTickPosition(QSlider.TickPosition.TicksBothSides)
         self.slider.setTickInterval(10)
         self.slider.valueChanged.connect(self.handle_slider_change)
         top_layout.addWidget(self.slider)
         layout.addLayout(top_layout)
-
-        self.start_button = QPushButton("Start")
-        self.start_button.clicked.connect(self.toggle_animation)
+        # Adding the slider inside the horizontal layout which is inside the main vertical layout
+        # We did the image first because it's left side to right side oriented
 
         fps_layout = QHBoxLayout()
         fps_layout.addWidget(QLabel("Frames per second"))
         self.current_fps_label = QLabel(str(self.fps))
         fps_layout.addWidget(self.current_fps_label)
         layout.addLayout(fps_layout)
+        # Adding a Frames Per Second inside a different horizontal layout
+        # Will go below the other horizontal layout because of top to bottom orientation
 
         self.toggle_btn = QPushButton("Start")
         self.toggle_btn.clicked.connect(self.toggle_animation)
         layout.addWidget(self.toggle_btn)
+        # Adding the Start Button at the very bottom because of top to bottom orientation
 
         menu_bar = self.menuBar()
         file_menu = menu_bar.addMenu("File")
@@ -85,19 +87,20 @@ class SpritePreview(QMainWindow):
         pause_action.triggered.connect(self.pause_animation)
         exit_action = file_menu.addAction("Exit")
         exit_action.triggered.connect(self.close)
+        # Adding a File menu on the top left that has Pause and Exit Actions
 
     def handle_slider_change(self, value):
         self.fps = value
         self.current_fps_label.setText(str(value))
-        if self.timer.isActive():
-            self.timer.start(1000 // self.fps)
+        self.timer.setInterval(int(1000 // self.fps))
 
     def toggle_animation(self):
-        if self.timer.IsActive():
+        if self.is_playing:
             self.pause_animation()
         else:
             self.timer.start(int(1000 / self.fps))
             self.toggle_btn.setText("Stop")
+        self.is_playing = not self.is_playing
 
     def pause_animation(self):
         self.timer.stop()
@@ -106,8 +109,8 @@ class SpritePreview(QMainWindow):
     def update_frame(self):
         if not self.frames: return
         self.current_frame = (self.current_frame + 1) % len(self.frames)
-        pixmap = QPixmap(self.frames[self.current_frame])
-        self.sprite_label.setPixmap(pixmap)
+        self.sprite_label.setPixmap(self.frames[self.current_frame])
+
 
     # You will need methods in the class to act as slots to connect to signals
 
